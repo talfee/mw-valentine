@@ -4,7 +4,6 @@ import type { StepComponentProps } from "react-multistep";
 const ANSWER = "joe bart";
 
 function Question1Philosopher({ signalParent }: Partial<StepComponentProps>) {
-  if (!signalParent) return null;
   const [answer, setAnswer] = useState("");
   const [hintIndices, setHintIndices] = useState<number[]>([]);
   const [error, setError] = useState("");
@@ -13,6 +12,7 @@ function Question1Philosopher({ signalParent }: Partial<StepComponentProps>) {
   const isCorrect = normalized === ANSWER;
 
   useEffect(() => {
+    if (!signalParent) return;
     signalParent({ isValid: isCorrect });
   }, [isCorrect, signalParent]);
 
@@ -23,17 +23,26 @@ function Question1Philosopher({ signalParent }: Partial<StepComponentProps>) {
   };
 
   const revealHint = () => {
-    const next = hintIndices.length;
-    if (next < ANSWER.length) setHintIndices((i) => [...i, next]);
+    // Reveal the next *letter* (skip spaces so the word gap is always visible)
+    for (let idx = 0; idx < ANSWER.length; idx++) {
+      if (ANSWER[idx] === " ") continue;
+      if (hintIndices.includes(idx)) continue;
+      setHintIndices((i) => [...i, idx]);
+      return;
+    }
   };
 
-  const display = ANSWER.split("").map((char, i) =>
-    hintIndices.includes(i) ? char : "_"
-  ).join(" ");
+  const display = ANSWER
+    .split("")
+    .map((char, i) => {
+      // Always render the word break as an empty gap (not a revealable character)
+      if (char === " ") return "";
+      return hintIndices.includes(i) ? char : "_";
+    })
+    .join(" ");
 
   return (
     <div className="step step--text">
-      <h2>1/3</h2>
       <p>who do you believe to be the most influential philosopher of all time?</p>
       <p className="step__hint-display">{display}</p>
       <div className="step__hint-row">
@@ -50,12 +59,9 @@ function Question1Philosopher({ signalParent }: Partial<StepComponentProps>) {
             setError("");
           }}
           placeholder="Your answer"
-          className="step__input"
+          className={`step__input${isCorrect ? " step__input--correct" : ""}`}
           autoComplete="off"
         />
-        <button type="submit" className="step__submit">
-          Check
-        </button>
       </form>
       {error && <p className="step__error">{error}</p>}
     </div>

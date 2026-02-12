@@ -1,61 +1,48 @@
 import { useEffect, useState } from "react";
 import type { StepComponentProps } from "react-multistep";
 
-const OPTIONS = ["Bigway", "McDonald's", "Uncle Fatih's", "Jam Jar"] as const;
-const ANSWER = "Uncle Fatih's";
+const OPTIONS = ["bigway", "mcdonald's", "uncle fatih's", "jam jar"] as const;
+const ANSWER = "bigway";
 
 function Question2Munchies({ signalParent }: Partial<StepComponentProps>) {
-  if (!signalParent) return null;
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   const isCorrect = selected === ANSWER;
 
   useEffect(() => {
+    if (!signalParent) return;
     signalParent({ isValid: isCorrect });
   }, [isCorrect, signalParent]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selected) {
-      setError("Pick an option.");
-      return;
-    }
-    if (selected !== ANSWER) {
-      setError("Wrong, try again.");
-      return;
-    }
-    setError("");
-  };
-
   return (
     <div className="step step--choice">
-      <h2>2/3</h2>
-      <p>It's 1am and you're geeked with Tal. Where do you go for the munchies?</p>
-      <form onSubmit={handleSubmit}>
-        <ul className="step__options">
-          {OPTIONS.map((opt) => (
+      <p>it's 1am and you're geeked with tal. where do you go for the munchies?</p>
+      <ul className="step__options">
+        {OPTIONS.map((opt) => {
+          const isSelected = selected === opt;
+          const isSelectedCorrect = isSelected && opt === ANSWER;
+          return (
             <li key={opt}>
-              <label className="step__option">
+              <label
+                className={`step__option${isSelectedCorrect ? " step__option--correct" : ""}`}
+              >
                 <input
                   type="radio"
                   name="munchies"
                   value={opt}
-                  checked={selected === opt}
+                  checked={isSelected}
                   onChange={() => {
                     setSelected(opt);
-                    setError("");
+                    setError(opt === ANSWER ? "" : "Wrong, try again.");
                   }}
                 />
                 <span>{opt}</span>
               </label>
             </li>
-          ))}
-        </ul>
-        <button type="submit" className="step__submit">
-          Check
-        </button>
-      </form>
+          );
+        })}
+      </ul>
       {error && <p className="step__error">{error}</p>}
     </div>
   );

@@ -1,1 +1,24 @@
-/* No custom styling - plain HTML defaults */
+.step__hint-display {
+  /* Preserve multiple spaces so multi-word hints show a real gap */
+  white-space: pre;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+.step__input--correct {
+  color: #178a37;
+  border-color: #178a37;
+}
+
+.step__option--correct span {
+  color: #178a37;
+  font-weight: 700;
+}
+
+.step__image {
+  display: block;
+  width: min(320px, 90vw);
+  height: auto;
+  margin: 12px auto;
+  border-radius: 16px;
+}

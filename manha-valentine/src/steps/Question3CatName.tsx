@@ -4,7 +4,6 @@ import type { StepComponentProps } from "react-multistep";
 const ANSWER = "gnocchi";
 
 function Question3CatName({ signalParent }: Partial<StepComponentProps>) {
-  if (!signalParent) return null;
   const [answer, setAnswer] = useState("");
   const [hintIndices, setHintIndices] = useState<number[]>([]);
   const [error, setError] = useState("");
@@ -13,6 +12,7 @@ function Question3CatName({ signalParent }: Partial<StepComponentProps>) {
   const isCorrect = normalized === ANSWER;
 
   useEffect(() => {
+    if (!signalParent) return;
     signalParent({ isValid: isCorrect });
   }, [isCorrect, signalParent]);
 
@@ -33,8 +33,13 @@ function Question3CatName({ signalParent }: Partial<StepComponentProps>) {
 
   return (
     <div className="step step--text">
-      <h2>Question 3 of 3</h2>
-      <p>What is this cat called?</p>
+      <p>who is this creature?</p>
+      <img
+        className="step__image"
+        src="/gnocchi.png"
+        alt="a cat in a green hoodie"
+        loading="lazy"
+      />
       <p className="step__hint-display">{display}</p>
       <div className="step__hint-row">
         <button type="button" className="step__hint-btn" onClick={revealHint}>
@@ -50,12 +55,9 @@ function Question3CatName({ signalParent }: Partial<StepComponentProps>) {
             setError("");
           }}
           placeholder="Your answer"
-          className="step__input"
+          className={`step__input${isCorrect ? " step__input--correct" : ""}`}
           autoComplete="off"
         />
-        <button type="submit" className="step__submit">
-          Check
-        </button>
       </form>
       {error && <p className="step__error">{error}</p>}
     </div>

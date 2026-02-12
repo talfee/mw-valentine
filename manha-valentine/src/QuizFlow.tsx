@@ -1,4 +1,4 @@
-import { cloneElement } from "react";
+import { cloneElement, useEffect } from "react";
 import type { ReactElement } from "react";
 import MultiStep, { useMultiStep } from "react-multistep";
 import type { StepComponentProps, SignalParent } from "react-multistep";
@@ -13,9 +13,17 @@ function QuizChrome({
   onComplete: () => void;
   children: React.ReactNode;
 }) {
-  const { activeStep, stepCount, next, previous, currentStepValid } = useMultiStep();
+  const { activeStep, stepCount, next, currentStepValid } = useMultiStep();
   const isLastStep = activeStep === stepCount - 1;
   const progress = stepCount > 0 ? ((activeStep + 1) / stepCount) * 100 : 0;
+
+  // Auto-advance after correct answers for Q1 and Q2
+  useEffect(() => {
+    if ((activeStep === 0 || activeStep === 1) && currentStepValid) {
+      const t = window.setTimeout(() => next(), 450);
+      return () => window.clearTimeout(t);
+    }
+  }, [activeStep, currentStepValid, next]);
 
   return (
     <div className="quiz">
@@ -26,35 +34,29 @@ function QuizChrome({
         Question {activeStep + 1} of {stepCount}
       </p>
       <div className="quiz__content">{children}</div>
-      <div className="quiz__nav">
-        <button
-          type="button"
-          className="quiz__btn quiz__btn--back"
-          onClick={previous}
-          disabled={activeStep === 0}
-        >
-          Back
-        </button>
-        {isLastStep ? (
-          <button
-            type="button"
-            className="quiz__btn quiz__btn--next"
-            onClick={() => currentStepValid && onComplete()}
-            disabled={!currentStepValid}
-          >
-            See your valentine
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="quiz__btn quiz__btn--next"
-            onClick={next}
-            disabled={!currentStepValid}
-          >
-            Next
-          </button>
-        )}
-      </div>
+      {activeStep >= 2 && (
+        <div className="quiz__nav">
+          {isLastStep ? (
+            <button
+              type="button"
+              className="quiz__btn quiz__btn--next"
+              onClick={() => currentStepValid && onComplete()}
+              disabled={!currentStepValid}
+            >
+              See your valentine
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="quiz__btn quiz__btn--next"
+              onClick={next}
+              disabled={!currentStepValid}
+            >
+              Next
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
